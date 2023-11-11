@@ -42,7 +42,7 @@ def default_max_tokens(model: str) -> int:
     elif model in GPT_4_32K_MODELS:
         return base * 8
     elif model in GPT_4_128K_MODELS:
-        return base * 32
+        return 4096
 
 def are_functions_available(model: str) -> bool:
     """
@@ -413,6 +413,8 @@ class OpenAIHelper:
             return base * 2
         if self.config['model'] in GPT_4_32K_MODELS:
             return base * 8
+        if self.config['model'] in GPT_4_128K_MODELS:
+            return base * 8
         raise NotImplementedError(
             f"Max tokens for model {self.config['model']} is not implemented yet."
         )
@@ -433,7 +435,7 @@ class OpenAIHelper:
         if model in GPT_3_MODELS + GPT_3_16K_MODELS:
             tokens_per_message = 4  # every message follows <|start|>{role/name}\n{content}<|end|>\n
             tokens_per_name = -1  # if there's a name, the role is omitted
-        elif model in GPT_4_MODELS + GPT_4_32K_MODELS:
+        elif model in GPT_4_MODELS + GPT_4_32K_MODELS + GPT_4_128K_MODELS:
             tokens_per_message = 3
             tokens_per_name = 1
         else:
