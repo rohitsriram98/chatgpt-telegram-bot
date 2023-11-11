@@ -156,9 +156,9 @@ class OpenAIHelper:
                       #f"💰 {str(response.usage['total_tokens'])} {localized_text('stats_tokens', bot_language)}" \
                       #f" ({str(response.usage['prompt_tokens'])} {localized_text('prompt', bot_language)}," \
                       #f" {str(response.usage['completion_tokens'])} {localized_text('completion', bot_language)})"
-                      f"💰 {str(response.usage.total_tokens)} {localized_text('stats_tokens', bot_language)}" \
-                      f" ({str(response.usage.prompt_tokens)} {localized_text('prompt', bot_language)}," \
-                      f" {str(response.usage.completion_tokens)} {localized_text('completion', bot_language)})"
+            f"💰 {str(response.usage.total_tokens)} {localized_text('stats_tokens', bot_language)}" \
+            f" ({str(response.usage.prompt_tokens)} {localized_text('prompt', bot_language)}," \
+            f" {str(response.usage.completion_tokens)} {localized_text('completion', bot_language)})"
             if show_plugins_used:
                 answer += f"\n🔌 {', '.join(plugin_names)}"
         elif show_plugins_used:
@@ -538,7 +538,7 @@ class OpenAIHelper:
         num_tokens += 3  # every reply is primed with <|start|>assistant<|message|>
         return num_tokens
 
-     def __count_tokens_vision(self, fileobj) -> int:
+    def __count_tokens_vision(self, fileobj) -> int:
         """
         Counts the number of tokens for interpreting an image.
         :param image: image to interpret
