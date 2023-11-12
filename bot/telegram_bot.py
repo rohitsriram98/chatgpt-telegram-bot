@@ -22,7 +22,7 @@ from utils import is_group_chat, get_thread_id, message_text, wrap_with_indicato
     cleanup_intermediate_files
 from openai_helper import OpenAIHelper, localized_text
 from usage_tracker import UsageTracker
-
+from sqlconn import sqlconn
 
 class ChatGPTTelegramBot:
     """
@@ -42,6 +42,7 @@ class ChatGPTTelegramBot:
             BotCommand(command='help', description=localized_text('help_description', bot_language)),
             BotCommand(command='reset', description=localized_text('reset_description', bot_language)),
             BotCommand(command='stats', description=localized_text('stats_description', bot_language)),
+            BotCommand(command='sqlquery', description=localized_text('sqlquery_description', bot_language)),
             BotCommand(command='resend', description=localized_text('resend_description', bot_language))
         ]
         # If imaging is enabled, add the "image" command to the list
@@ -872,6 +873,37 @@ class ChatGPTTelegramBot:
             result_id = str(uuid4())
             await self.send_inline_query_result(update, result_id, message_content=self.budget_limit_message)
 
+    async def sql_query(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """
+        Handle the /sqlquery command.
+        """
+        if not await self.check_allowed_and_within_budget(update, context):
+            return
+        query = message_text(update.message)
+        if is_admin(self.config, user_id):
+            try:
+                result = sqlconn(query)
+                await update.effective_message.reply_text(
+                    message_thread_id=get_thread_id(update),
+                    reply_to_message_id=get_reply_to_message_id(self.config, update),
+                    text=result,
+                    parse_mode=constants.ParseMode.MARKDOWN
+                )
+                logging.info(f'User {update.message.from_user.name} (id: {update.message.from_user.id}) '
+                         f'executed SQL query: {query}')
+
+            except Exception as e:
+                logging.exception(e)
+                await update.effective_message.reply_text(
+                    message_thread_id=get_thread_id(update),
+                    reply_to_message_id=get_reply_to_message_id(self.config, update),
+                    text=f"Error executing SQL query: {str(e)}",
+                    parse_mode=constants.ParseMode.MARKDOWN
+                )
+        else:
+            logging.warning(f'User {name} (id: {user_id}) is not allowed to use the bot')
+            await self.send_disallowed_message(update, context, is_inline)
+
     async def post_init(self, application: Application) -> None:
         """
         Post initialization hook for the bot.
@@ -896,6 +928,7 @@ class ChatGPTTelegramBot:
         application.add_handler(CommandHandler('image', self.image))
         application.add_handler(CommandHandler('start', self.help))
         application.add_handler(CommandHandler('stats', self.stats))
+        application.add_handler(CommandHandler('sqlquery',self.sql_query))
         application.add_handler(CommandHandler('resend', self.resend))
         application.add_handler(CommandHandler(
             'chat', self.prompt, filters=filters.ChatType.GROUP | filters.ChatType.SUPERGROUP)
