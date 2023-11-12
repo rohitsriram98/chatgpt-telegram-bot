@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 import mysql.connector
+import logging
 
 def sqlconn(sqlquery):
     load_dotenv()
@@ -11,8 +12,8 @@ def sqlconn(sqlquery):
     logging.getLogger("httpx").setLevel(logging.WARNING)
     db_config = {
         "host": os.environ['HOST'],
-        "user": os.environ['USER'],
-        "password": os.environ['PASSWORD'],
+        "user": os.environ['SQLUSER'],
+        "password": os.environ['SQLPASSWORD'],
         "database": os.environ['DATABASE']
     }
 

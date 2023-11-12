@@ -4,6 +4,8 @@ import asyncio
 import logging
 import os
 import io
+from datetime import date
+import json
 
 from uuid import uuid4
 from telegram import BotCommandScopeAllGroupChats, Update, constants
@@ -877,12 +879,27 @@ class ChatGPTTelegramBot:
         """
         Handle the /sqlquery command.
         """
+        user_id = update.message.from_user.id
         if not await self.check_allowed_and_within_budget(update, context):
             return
-        query = message_text(update.message)
+        args = context.args
+        if not args:
+        # If no arguments are provided, inform the user about the correct usage
+            await update.effective_message.reply_text(
+                message_thread_id=get_thread_id(update),
+                reply_to_message_id=get_reply_to_message_id(self.config, update),
+                text="Please provide an SQL query after the /sqlquery command.",
+                parse_mode=ParseMode.MARKDOWN
+            )
+            return
+        args = [arg.strip('"') for arg in args]
+    # Join the arguments to form the complete SQL query
+        query = ' '.join(args)
+        #query = message_text(update.message)
         if is_admin(self.config, user_id):
             try:
-                result = sqlconn(query)
+                result = json.dumps(sqlconn(query), default=str)
+                
                 await update.effective_message.reply_text(
                     message_thread_id=get_thread_id(update),
                     reply_to_message_id=get_reply_to_message_id(self.config, update),
