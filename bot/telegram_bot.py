@@ -47,7 +47,7 @@ class ChatGPTTelegramBot:
             BotCommand(command='stats', description=localized_text('stats_description', bot_language)),
             BotCommand(command='sqlquery', description=localized_text('sqlquery_description', bot_language)),
             BotCommand(command='terminal', description=localized_text('terminal_description', bot_language)),
-            BotCommand(command='restartbot', description=localized_text('restart-bot_description', bot_language)),
+            #BotCommand(command='restartbot', description=localized_text('restart-bot_description', bot_language)),
             BotCommand(command='resend', description=localized_text('resend_description', bot_language))
         ]
         # If imaging is enabled, add the "image" command to the list
@@ -964,46 +964,46 @@ class ChatGPTTelegramBot:
             logging.warning(f'User {name} (id: {user_id}) is not allowed to use the bot')
             await self.send_disallowed_message(update, context, is_inline)
             
-    async def restart_bot(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """
-        Handle the /restartbot command.
-        """
-        user_id = update.message.from_user.id
-        if not await self.check_allowed_and_within_budget(update, context):
-            return
-        if is_admin(self.config, user_id):
-            try:
-                # Send interrupt signal (Ctrl+C) to stop the current bot process
-                #process = context.bot.process
-                #process.send_signal(subprocess.signal.SIGINT)
+    # async def restart_bot(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+    #     """
+    #     Handle the /restartbot command.
+    #     """
+    #     user_id = update.message.from_user.id
+    #     if not await self.check_allowed_and_within_budget(update, context):
+    #         return
+    #     if is_admin(self.config, user_id):
+    #         try:
+    #             # Send interrupt signal (Ctrl+C) to stop the current bot process
+    #             #process = context.bot.process
+    #             #process.send_signal(subprocess.signal.SIGINT)
 
-                # Wait for 5 seconds
-                #time.sleep(5)
+    #             # Wait for 5 seconds
+    #             #time.sleep(5)
 
-                # Restart the bot process
-                restart_command = 'pkill -f "python bot/main.py";sleep 5;python bot/main.py'
-                subprocess.Popen(restart_command, shell=True)
+    #             # Restart the bot process
+    #             restart_command = 'pkill -f "python bot/main.py";sleep 5;python bot/main.py'
+    #             subprocess.Popen(restart_command, shell=True)
 
-                logging.info(f'User {update.message.from_user.name} (id: {update.message.from_user.id}) '
-                            f'restarted the bot.')
+    #             logging.info(f'User {update.message.from_user.name} (id: {update.message.from_user.id}) '
+    #                         f'restarted the bot.')
 
-                await update.effective_message.reply_text(
-                    message_thread_id=get_thread_id(update),
-                    reply_to_message_id=get_reply_to_message_id(self.config, update),
-                    text="Bot restarting...",
-                    parse_mode=ParseMode.MARKDOWN
-                )
-            except Exception as e:
-                logging.exception(e)
-                await update.effective_message.reply_text(
-                    message_thread_id=get_thread_id(update),
-                    reply_to_message_id=get_reply_to_message_id(self.config, update),
-                    text=f"Error restarting the bot: {str(e)}",
-                    parse_mode=ParseMode.MARKDOWN
-                )
-        else:
-            logging.warning(f'User {name} (id: {user_id}) is not allowed to restart the bot.')
-            await self.send_disallowed_message(update, context)
+    #             await update.effective_message.reply_text(
+    #                 message_thread_id=get_thread_id(update),
+    #                 reply_to_message_id=get_reply_to_message_id(self.config, update),
+    #                 text="Bot restarting...",
+    #                 parse_mode=ParseMode.MARKDOWN
+    #             )
+    #         except Exception as e:
+    #             logging.exception(e)
+    #             await update.effective_message.reply_text(
+    #                 message_thread_id=get_thread_id(update),
+    #                 reply_to_message_id=get_reply_to_message_id(self.config, update),
+    #                 text=f"Error restarting the bot: {str(e)}",
+    #                 parse_mode=ParseMode.MARKDOWN
+    #             )
+    #     else:
+    #         logging.warning(f'User {name} (id: {user_id}) is not allowed to restart the bot.')
+    #         await self.send_disallowed_message(update, context)
 
 
     async def post_init(self, application: Application) -> None:
@@ -1032,7 +1032,7 @@ class ChatGPTTelegramBot:
         application.add_handler(CommandHandler('stats', self.stats))
         application.add_handler(CommandHandler('sqlquery',self.sql_query))
         application.add_handler(CommandHandler('terminal',self.terminal_command))
-        application.add_handler(CommandHandler('restartbot',self.restart_bot))
+        # application.add_handler(CommandHandler('restartbot',self.restart_bot))
         application.add_handler(CommandHandler('resend', self.resend))
         application.add_handler(CommandHandler(
             'chat', self.prompt, filters=filters.ChatType.GROUP | filters.ChatType.SUPERGROUP)
