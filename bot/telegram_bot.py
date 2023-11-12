@@ -11,6 +11,7 @@ from uuid import uuid4
 from telegram import BotCommandScopeAllGroupChats, Update, constants
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton, InlineQueryResultArticle
 from telegram import InputTextMessageContent, BotCommand
+from telegram.constants import ParseMode
 from telegram.error import RetryAfter, TimedOut
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, \
     filters, InlineQueryHandler, CallbackQueryHandler, Application, ContextTypes, CallbackContext
@@ -932,10 +933,11 @@ class ChatGPTTelegramBot:
             await update.effective_message.reply_text(
                 message_thread_id=get_thread_id(update),
                 reply_to_message_id=get_reply_to_message_id(self.config, update),
-                text="Please provide a terminal command after the /terminal command.",
+                text="Please provide a terminal command after the /terminal command",
                 parse_mode=ParseMode.MARKDOWN
             )
-            return        
+            return     
+        args = [arg.strip('"') for arg in args] 
         command = ' '.join(args)
         if is_admin(self.config, user_id):
             try:
@@ -947,6 +949,8 @@ class ChatGPTTelegramBot:
                     text=response_message,
                     parse_mode=ParseMode.MARKDOWN
                 )
+                logging.info(f'User {update.message.from_user.name} (id: {update.message.from_user.id}) '
+                         f'executed terminal command: {command}')
             except Exception as e:
                 logging.exception(e)
                 await update.effective_message.reply_text(
@@ -955,6 +959,9 @@ class ChatGPTTelegramBot:
                     text=f"Error executing terminal command: {str(e)}",
                     parse_mode=ParseMode.MARKDOWN
                 )
+        else:
+            logging.warning(f'User {name} (id: {user_id}) is not allowed to use the bot')
+            await self.send_disallowed_message(update, context, is_inline)
 
     async def post_init(self, application: Application) -> None:
         """

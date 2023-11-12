@@ -6,6 +6,7 @@
         "stats_description":"Get your current usage statistics",
         "resend_description":"Resend the latest message",
         "sqlquery_description":"Use /sqlquery <your_query_here> to execute SQL queries",
+        "terminal_description":"Use /terminal <your_query_here> to execute terminal commands",
         "chat_description":"Chat with the bot!",
         "disallowed":"Sorry, you are not allowed to use this bot",
         "budget_limit":"Sorry, you have reached your usage limit.",
