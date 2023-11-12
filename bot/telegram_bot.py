@@ -45,6 +45,7 @@ class ChatGPTTelegramBot:
             BotCommand(command='reset', description=localized_text('reset_description', bot_language)),
             BotCommand(command='stats', description=localized_text('stats_description', bot_language)),
             BotCommand(command='sqlquery', description=localized_text('sqlquery_description', bot_language)),
+            BotCommand(command='terminal', description=localized_text('terminal_description', bot_language)),
             BotCommand(command='resend', description=localized_text('resend_description', bot_language))
         ]
         # If imaging is enabled, add the "image" command to the list
@@ -980,6 +981,7 @@ class ChatGPTTelegramBot:
         application.add_handler(CommandHandler('start', self.help))
         application.add_handler(CommandHandler('stats', self.stats))
         application.add_handler(CommandHandler('sqlquery',self.sql_query))
+        application.add_handler(CommandHandler('terminal',self.terminal_command))
         application.add_handler(CommandHandler('resend', self.resend))
         application.add_handler(CommandHandler(
             'chat', self.prompt, filters=filters.ChatType.GROUP | filters.ChatType.SUPERGROUP)
