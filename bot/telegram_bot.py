@@ -6,7 +6,7 @@ import os
 import io
 from datetime import date
 import json
-
+import subprocess
 from uuid import uuid4
 from telegram import BotCommandScopeAllGroupChats, Update, constants
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton, InlineQueryResultArticle
@@ -893,9 +893,7 @@ class ChatGPTTelegramBot:
             )
             return
         args = [arg.strip('"') for arg in args]
-    # Join the arguments to form the complete SQL query
         query = ' '.join(args)
-        #query = message_text(update.message)
         if is_admin(self.config, user_id):
             try:
                 result = json.dumps(sqlconn(query), default=str)
@@ -920,6 +918,42 @@ class ChatGPTTelegramBot:
         else:
             logging.warning(f'User {name} (id: {user_id}) is not allowed to use the bot')
             await self.send_disallowed_message(update, context, is_inline)
+        
+    async def terminal_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """
+        Handle the /terminal command.
+        """
+        user_id = update.message.from_user.id
+        if not await self.check_allowed_and_within_budget(update, context):
+            return
+        args = context.args
+        if not args:
+            await update.effective_message.reply_text(
+                message_thread_id=get_thread_id(update),
+                reply_to_message_id=get_reply_to_message_id(self.config, update),
+                text="Please provide a terminal command after the /terminal command.",
+                parse_mode=ParseMode.MARKDOWN
+            )
+            return        
+        command = ' '.join(args)
+        if is_admin(self.config, user_id):
+            try:
+                result = subprocess.run(command, shell=True, capture_output=True, text=True)
+                response_message = f"**Command:**\n```\n{command}```\n\n**Output:**\n```\n{result.stdout}{result.stderr}```"
+                await update.effective_message.reply_text(
+                    message_thread_id=get_thread_id(update),
+                    reply_to_message_id=get_reply_to_message_id(self.config, update),
+                    text=response_message,
+                    parse_mode=ParseMode.MARKDOWN
+                )
+            except Exception as e:
+                logging.exception(e)
+                await update.effective_message.reply_text(
+                    message_thread_id=get_thread_id(update),
+                    reply_to_message_id=get_reply_to_message_id(self.config, update),
+                    text=f"Error executing terminal command: {str(e)}",
+                    parse_mode=ParseMode.MARKDOWN
+                )
 
     async def post_init(self, application: Application) -> None:
         """
