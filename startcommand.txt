@@ -1,2 +1,2 @@
 source venv/bin/activate
-(venv) (base) ubuntu@instance-ubuntu:~/chatgpt-telegram-bot$ python bot/main.py
+(venv) (base) ubuntu@instance-ubuntu:~/chatgpt-telegram-bot$ python3 bot/main.py
